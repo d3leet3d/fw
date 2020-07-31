@@ -21,7 +21,7 @@ function Build()
 				local function Start()
 					Service:Start()
 				end
-				spawn(Start)
+				coroutine.resume(coroutine.create(Start))
 			end
 		end
 	end
