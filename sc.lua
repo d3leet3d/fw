@@ -1,8 +1,12 @@
 local ScriptService = script.Parent
 local ServerStorage = game:GetService("ServerStorage")
+local Remotes = Instance.new("Folder")
+Remotes.Name = "Remotes"
+Remotes.Parent = game.ReplicatedStorage:WaitForChild("LeetsFrameWorkClient")
+local Loaded = game.ReplicatedStorage:WaitForChild("LeetsFrameWorkClient"):WaitForChild("Loaded")
 local Framework = {}
 local Mt = {__Index = Framework}
-
+local Players
 function Build()
 	local function InitService(Service)
 		if (type(Service.Init) == "function") then
@@ -14,15 +18,34 @@ function Build()
 			Service:Init()
 		end
 	end
-	
-	local function StartServices(Services)
-		for i,Service in pairs(Services) do
-			if (type(Service.Start) == "function") then
-				local function Start()
-					Service:Start()
+	local function BuildServiceRemotes(Service)
+		if Service.Client then
+			for i,Event in pairs(Service.Client.Events) do
+				if not Remotes:FindFirstChild(tostring(Event)) then
+					local Re = Instance.new("RemoteEvent")
+					Re.Name = tostring(Event)
+					Re.Parent = Remotes
+					Service.Client.Events[tostring(Event)] = Re
 				end
-				coroutine.resume(coroutine.create(Start))
 			end
+			for i,Func in pairs(Service.Client.Functions) do
+				if not Remotes:FindFirstChild(tostring(Func)) then
+					local Re = Instance.new("RemoteFunction")
+					Re.Name = tostring(Func)
+					Re.Parent = Remotes
+					Service.Client.Events[tostring(Func)] = Re
+				end
+			end
+		end
+	end
+	local function StartServices(Services)
+		
+		for i,Service in pairs(Services) do
+			BuildServiceRemotes(Service)
+			if (type(Service.Start) == "function") then
+				coroutine.resume(coroutine.create(Service.Start))
+			end
+			
 		end
 	end
 	
@@ -61,8 +84,20 @@ function Build()
 			end
 		end
 	end
+	local function StartPlayerAdded(Services)
+		for i,Service in pairs(Services) do
+			if (type(Service.PlayerAdded) == "function") then
+				game.Players.PlayerAdded:Connect(Service.PlayerAdded)
+				for _,Player in pairs(game.Players:GetPlayers()) do
+					Service:PlayerAdded(Player)
+				end
+			end
+		end
+	end
 	ModuleToService()
 	InitAllServices(Framework)
 	StartServices(Framework)
+	StartPlayerAdded(Framework)
 end
 Build()
+Loaded.Value = true
