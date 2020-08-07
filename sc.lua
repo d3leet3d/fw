@@ -15,7 +15,7 @@ function Build()
 					local Re = Instance.new("RemoteEvent")
 					Re.Name = tostring(Event)
 					Re.Parent = Remotes
-					Service.Client.Events[tostring(Event)] = Re
+					Service[tostring(Event)] = Re
 				end
 			end
 			for i,Func in pairs(Service.Client.Functions) do
@@ -23,7 +23,7 @@ function Build()
 					local Re = Instance.new("RemoteFunction")
 					Re.Name = tostring(Func)
 					Re.Parent = Remotes
-					Service.Client.Functions[tostring(Func)] = Re
+					Service[tostring(Func)] = Re
 				end
 			end
 		end
