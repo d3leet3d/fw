@@ -1,0 +1,70 @@
+local Player = game.Players.LocalPlayer
+local Fw = game.ReplicatedStorage:WaitForChild("LeetsFrameWorkClient")
+Remotes = Fw:WaitForChild("Remotes")
+
+local Framework = {}
+local Mt = {__Index = Framework}
+function Build()
+	local function InitService(Service)
+		if (type(Service.Init) == "function") then
+			Service.Player = Player
+			Service.Remotes = Remotes
+			for i,v in pairs(Framework) do
+			if tostring(v) ~= tostring(Service) then
+				Service[i] = v
+			end
+		end
+			Service:Init()
+		end
+	end
+	
+	local function StartServices(Services)
+		for i,Service in pairs(Services) do
+			if (type(Service.Start) == "function") then
+				coroutine.resume(coroutine.create(Service.Start))
+			end
+			
+		end
+	end
+	
+	local function InstallService(Module)
+		local Service = require(Module)
+		Framework[Module.Name] = Service
+		setmetatable(Service,Mt)
+	end
+	
+	local function InitAllServices(Services)
+		local serviceTables = {}
+		local function CollectServices(_services)
+			for _,service in pairs(_services) do
+				if (getmetatable(service) == Mt) then
+					serviceTables[#serviceTables + 1] = service
+				else
+					CollectServices(service)
+				end
+			end
+		end
+		CollectServices(Services)
+		table.sort(serviceTables,function(a,b)
+			local AOrder = (type(a.__LoadOrder) == "number" and a.__LoadOrder or math.huge)
+			local BOrder = (type(b.__LoadOrder) == "number" and b.__LoadOrder or math.huge)
+			return (AOrder < BOrder)
+		end)
+		for _,Service in ipairs(serviceTables) do
+			InitService(Service)
+		end
+	end
+	local function ModuleToService()
+		for _,Module in pairs(Fw:WaitForChild("ClientModules"):GetChildren()) do
+			if Module:IsA("ModuleScript") then
+				InstallService(Module:Clone())
+			end
+		end
+		game.Debris:AddItem(Fw:WaitForChild("ClientModules"),1)
+	end
+	ModuleToService()
+	InitAllServices(Framework)
+	StartServices(Framework)
+end
+repeat wait() until Fw:WaitForChild("Loaded").Value == true
+Build()
