@@ -8,16 +8,6 @@ local Framework = {}
 local Mt = {__Index = Framework}
 local Players
 function Build()
-	local function InitService(Service)
-		if (type(Service.Init) == "function") then
-			for i,v in pairs(Framework) do
-			if tostring(v) ~= tostring(Service) then
-				Service[i] = v
-			end
-		end
-			Service:Init()
-		end
-	end
 	local function BuildServiceRemotes(Service)
 		if Service.Client then
 			for i,Event in pairs(Service.Client.Events) do
@@ -33,15 +23,25 @@ function Build()
 					local Re = Instance.new("RemoteFunction")
 					Re.Name = tostring(Func)
 					Re.Parent = Remotes
-					Service.Client.Events[tostring(Func)] = Re
+					Service.Client.Functions[tostring(Func)] = Re
 				end
 			end
+		end
+	end
+	local function InitService(Service)
+		BuildServiceRemotes(Service)
+		if (type(Service.Init) == "function") then
+			for i,v in pairs(Framework) do
+			if tostring(v) ~= tostring(Service) then
+				Service[i] = v
+			end
+		end
+			Service:Init()
 		end
 	end
 	local function StartServices(Services)
 		
 		for i,Service in pairs(Services) do
-			BuildServiceRemotes(Service)
 			if (type(Service.Start) == "function") then
 				coroutine.resume(coroutine.create(Service.Start))
 			end
@@ -56,6 +56,7 @@ function Build()
 	end
 	
 	local function InitAllServices(Services)
+		
 		local serviceTables = {}
 		local function CollectServices(_services)
 			for _,service in pairs(_services) do
