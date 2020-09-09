@@ -1,7 +1,7 @@
 local Player = game.Players.LocalPlayer
+local Character
 local Fw = game.ReplicatedStorage:WaitForChild("LeetsFrameWorkClient")
 Remotes = Fw:WaitForChild("Remotes")
-
 local Framework = {}
 local Mt = {__Index = Framework}
 function Build()
@@ -62,7 +62,20 @@ function Build()
 		end
 		game.Debris:AddItem(Fw:WaitForChild("ClientModules"),1)
 	end
+	local function UpDateCharacter(Services)
+		repeat wait() until Player.Character
+		Character = Player.Character
+		for i,Service in pairs(Services) do
+			Service.CharacterAdded = Instance.new("BindableEvent")
+			Service.Character = Character
+			Player.CharacterAdded:Connect(function(Char) 
+				Service.Character = Char
+				Service.CharacterAdded:Fire(Char)
+			end)
+		end
+	end
 	ModuleToService()
+	UpDateCharacter(Framework)
 	InitAllServices(Framework)
 	StartServices(Framework)
 end
