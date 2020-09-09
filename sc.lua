@@ -10,25 +10,34 @@ local Players
 function Build()
 	local function BuildServiceRemotes(Service)
 		if Service.Client then
-			for i,Event in pairs(Service.Client.Events) do
-				if not Remotes:FindFirstChild(tostring(Event)) then
+			for i,index in pairs(Service.Client.Events) do
+				if not Remotes:FindFirstChild(tostring(index.Event)) then
 					local Re = Instance.new("RemoteEvent")
-					Re.Name = tostring(Event)
+					Re.Name = tostring(index.Event)
+					if (type(index.Func) == "function") then
+						print("Debug")
+						Re.OnServerEvent:Connect(index.Func)
+					end
 					Re.Parent = Remotes
-					Service[tostring(Event)] = Re
+					Service.RemoteEvents[tostring(index.Event)] = Re
 				end
 			end
-			for i,Func in pairs(Service.Client.Functions) do
-				if not Remotes:FindFirstChild(tostring(Func)) then
+			for i,index in pairs(Service.Client.Functions) do
+				if not Remotes:FindFirstChild(tostring(index.Name)) then
 					local Re = Instance.new("RemoteFunction")
-					Re.Name = tostring(Func)
+					Re.Name = tostring(index.Name)
+					if (type(index.Func) == "function") then
+						Re.OnServerInvoke = index.Func
+					end
+					Service.RemoteFunctions = Re
 					Re.Parent = Remotes
-					Service[tostring(Func)] = Re
 				end
 			end
 		end
 	end
 	local function InitService(Service)
+		Service.RemoteEvents = {}
+		Service.RemoteFunctions = {}
 		BuildServiceRemotes(Service)
 		if (type(Service.Init) == "function") then
 			for i,v in pairs(Framework) do
