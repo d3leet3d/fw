@@ -15,7 +15,6 @@ function Build()
 					local Re = Instance.new("RemoteEvent")
 					Re.Name = tostring(index.Event)
 					if (type(index.Func) == "function") then
-						print("Debug")
 						Re.OnServerEvent:Connect(index.Func)
 					end
 					Re.Parent = Remotes
@@ -104,10 +103,18 @@ function Build()
 			end
 		end
 	end
+	local function StartLeaving(Services)
+		for i,Service in pairs(Services) do
+			if (type(Service.PlayerLeaving) == "function") then
+				game.Players.PlayerRemoving:Connect(Service.PlayerLeaving)
+			end
+		end
+	end
 	ModuleToService()
 	InitAllServices(Framework)
 	StartServices(Framework)
 	StartPlayerAdded(Framework)
+	StartLeaving(Framework)
 end
 Build()
 Loaded.Value = true
