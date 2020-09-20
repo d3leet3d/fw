@@ -1,5 +1,6 @@
 local Player = game.Players.LocalPlayer
 local Character
+local Rs = game:GetService("RunService")
 local Fw = game.ReplicatedStorage:WaitForChild("LeetsFrameWorkClient")
 Remotes = Fw:WaitForChild("Remotes")
 local Framework = {}
@@ -74,10 +75,18 @@ function Build()
 			end)
 		end
 	end
+	local function StartUpDate(Services)
+		for i,Service in pairs(Services) do
+			if (type(Service.Update) == "function") then
+				Rs.RenderStepped:Connect(Service.Update)
+			end
+		end
+	end
 	ModuleToService()
 	UpDateCharacter(Framework)
 	InitAllServices(Framework)
 	StartServices(Framework)
+	StartUpDate(Framework)
 end
 repeat wait() until Fw:WaitForChild("Loaded").Value == true
 Build()
