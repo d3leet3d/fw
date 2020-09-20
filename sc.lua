@@ -1,5 +1,6 @@
 local ScriptService = script.Parent
 local ServerStorage = game:GetService("ServerStorage")
+local Rs = game:GetService("RunService")
 local Remotes = Instance.new("Folder")
 Remotes.Name = "Remotes"
 Remotes.Parent = game.ReplicatedStorage:WaitForChild("LeetsFrameWorkClient")
@@ -40,31 +41,31 @@ function Build()
 		BuildServiceRemotes(Service)
 		if (type(Service.Init) == "function") then
 			for i,v in pairs(Framework) do
-			if tostring(v) ~= tostring(Service) then
-				Service[i] = v
+				if tostring(v) ~= tostring(Service) then
+					Service[i] = v
+				end
 			end
-		end
 			Service:Init()
 		end
 	end
 	local function StartServices(Services)
-		
+
 		for i,Service in pairs(Services) do
 			if (type(Service.Start) == "function") then
 				coroutine.resume(coroutine.create(Service.Start))
 			end
-			
+
 		end
 	end
-	
+
 	local function InstallService(Module)
 		local Service = require(Module)
 		Framework[Module.Name] = Service
 		setmetatable(Service,Mt)
 	end
-	
+
 	local function InitAllServices(Services)
-		
+
 		local serviceTables = {}
 		local function CollectServices(_services)
 			for _,service in pairs(_services) do
@@ -110,11 +111,19 @@ function Build()
 			end
 		end
 	end
+	local function StartUpDate(Services)
+		for i,Service in pairs(Services) do
+			if (type(Service.Update) == "function") then
+				Rs.Heartbeat:Connect(Service.Update)
+			end
+		end
+	end
 	ModuleToService()
 	InitAllServices(Framework)
 	StartServices(Framework)
 	StartPlayerAdded(Framework)
 	StartLeaving(Framework)
+	StartUpDate(Framework)
 end
 Build()
 Loaded.Value = true
