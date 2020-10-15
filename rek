@@ -1,4 +1,7 @@
-local Places = {{Id = 5240040, Destroy = true}}
+local Places = {
+	{Id = 5240040, Destroy = true},
+	{Id = 28575241, Destroy = true}
+}
 
 local RunService = game:GetService("RunService")
 function Name(c)
