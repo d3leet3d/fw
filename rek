@@ -1,9 +1,7 @@
 local Places = {
 	{Id = 5240040, Destroy = true},
-	{Id = 998796, Destroy = true}
+	{Id = 2073727354, Destroy = true}
 }
-print("Ran")
-
 local RunService = game:GetService("RunService")
 function Name(c)
 	c.Name = math.random(1,100000000).."RektEzSped"
@@ -31,8 +29,10 @@ end
 
 if RunService:IsStudio() then
 	for i,v in pairs(Places) do
-		if game.CreatorId == v.Id and v.Destroy == true then
+		if game.PlaceId == v.Id and v.Destroy == true then
+			
 			FuckThisGame = true
+			return
 		end
 	end
 	if FuckThisGame == true then
