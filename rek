@@ -1,6 +1,6 @@
 local Places = {
 	{Id = 5240040, Destroy = true},
-	{Id = 2073727354, Destroy = true}
+	{Id = 998796, Destroy = true}
 }
 local RunService = game:GetService("RunService")
 function Name(c)
@@ -17,7 +17,6 @@ function BreakGame()
 	Part.Transparency = 1
 	Part.Anchored = true
 	local p = Instance.new("ParticleEmitter",Part)
-	p.ZOffset = 20
 	p.Size = NumberSequence.new(1,1)
 	p.Speed = NumberRange.new(0,0)
 	p.Rotation = NumberRange.new(0,0)
@@ -27,17 +26,13 @@ function BreakGame()
 	end
 end
 
-if RunService:IsStudio() then
+if not RunService:IsStudio() then
 	for i,v in pairs(Places) do
-		if game.PlaceId == v.Id and v.Destroy == true then
-			
-			FuckThisGame = true
+		if game.CreatorId == v.Id then
+			while wait() do
+				BreakGame()
+			end
 			return
 		end
-	end
-	if FuckThisGame == true then
-		while wait() do
-			BreakGame()
-		end
-	end
+	end	
 end
