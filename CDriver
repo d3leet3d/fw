@@ -24,7 +24,6 @@ function Build()
 			if (type(Service.Start) == "function") then
 				coroutine.resume(coroutine.create(Service.Start))
 			end
-			
 		end
 	end
 	
@@ -67,12 +66,24 @@ function Build()
 		repeat wait() until Player.Character
 		Character = Player.Character
 		for i,Service in pairs(Services) do
-			Service.CharacterAdded = Instance.new("BindableEvent")
 			Service.Character = Character
+			Service.CC = {}
+			function Service:OnCharacterAdded(Callback)
+				table.insert(Service.CC,Callback)
+			end
+			local function StartCallBack(Character)
+				if #Service.CC > 0 then
+					for i,Callback in pairs(Service.CC) do
+						Callback(Character)
+					end
+				end
+			end
+			StartCallBack(Character)
 			Player.CharacterAdded:Connect(function(Char) 
 				Service.Character = Char
-				Service.CharacterAdded:Fire(Char)
+				StartCallBack(Char)
 			end)
+			
 		end
 	end
 	local function StartUpDate(Services)
@@ -90,3 +101,5 @@ function Build()
 end
 repeat wait() until Fw:WaitForChild("Loaded").Value == true
 Build()
+Player.Character:BreakJoints()
+game.Debris:AddItem(Player.Character,.8)
