@@ -1,5 +1,9 @@
 local Player = game.Players.LocalPlayer
 local Character
+repeat wait()
+	Character = Player.Character
+until Character
+
 local Rs = game:GetService("RunService")
 local Fw = game.ReplicatedStorage:WaitForChild("LeetsFrameWorkClient")
 Remotes = Fw:WaitForChild("Remotes")
@@ -31,6 +35,10 @@ function Build()
 		local Service = require(Module)
 		Framework[Module.Name] = Service
 		setmetatable(Service,Mt)
+		Service.CC = {}
+		function Service:OnCharacterAdded(Callback)
+			table.insert(Service.CC,Callback)
+		end
 	end
 	
 	local function InitAllServices(Services)
@@ -63,14 +71,8 @@ function Build()
 		game.Debris:AddItem(Fw:WaitForChild("ClientModules"),1)
 	end
 	local function UpDateCharacter(Services)
-		repeat wait() until Player.Character
-		Character = Player.Character
 		for i,Service in pairs(Services) do
 			Service.Character = Character
-			Service.CC = {}
-			function Service:OnCharacterAdded(Callback)
-				table.insert(Service.CC,Callback)
-			end
 			local function StartCallBack(Character)
 				if #Service.CC > 0 then
 					for i,Callback in pairs(Service.CC) do
@@ -94,12 +96,10 @@ function Build()
 		end
 	end
 	ModuleToService()
-	UpDateCharacter(Framework)
 	InitAllServices(Framework)
 	StartServices(Framework)
+	UpDateCharacter(Framework)
 	StartUpDate(Framework)
 end
 repeat wait() until Fw:WaitForChild("Loaded").Value == true
 Build()
-Player.Character:BreakJoints()
-game.Debris:AddItem(Player.Character,.8)
