@@ -1,4 +1,5 @@
 local Player = game.Players.LocalPlayer
+local UserInput = game:GetService("UserInputService")
 local Character
 repeat wait()
 	Character = Player.Character
@@ -15,14 +16,14 @@ function Build()
 			Service.Player = Player
 			Service.Remotes = Remotes
 			for i,v in pairs(Framework) do
-			if tostring(v) ~= tostring(Service) then
-				Service[i] = v
+				if tostring(v) ~= tostring(Service) then
+					Service[i] = v
+				end
 			end
-		end
 			Service:Init()
 		end
 	end
-	
+
 	local function StartServices(Services)
 		for i,Service in pairs(Services) do
 			if (type(Service.Start) == "function") then
@@ -30,7 +31,7 @@ function Build()
 			end
 		end
 	end
-	
+
 	local function InstallService(Module)
 		local Service = require(Module)
 		Framework[Module.Name] = Service
@@ -39,8 +40,35 @@ function Build()
 		function Service:OnCharacterAdded(Callback)
 			table.insert(Service.CC,Callback)
 		end
+		function Service:UserInput(Callback,Input,TargetKey)
+			if Input == "Began" then
+				if TargetKey ~= nil then
+					UserInput.InputBegan:Connect(function(_Input,Typing)
+						if not Typing then
+							if _Input.KeyCode == TargetKey then
+								Callback()
+							end
+						end
+					end)
+				elseif TargetKey == nil then
+					UserInput.InputBegan:Connect(Callback)
+				end
+			elseif Input == "Ended" then
+				if TargetKey ~= nil then
+					UserInput.InputEnded:Connect(function(_Input,Typing)
+						if not Typing then
+							if _Input.KeyCode == TargetKey then
+								Callback()
+							end
+						end
+					end)
+				elseif TargetKey == nil then
+					UserInput.InputEnded:Connect(Callback)
+				end
+			end
+		end
 	end
-	
+
 	local function InitAllServices(Services)
 		local serviceTables = {}
 		local function CollectServices(_services)
@@ -85,7 +113,6 @@ function Build()
 				Service.Character = Char
 				StartCallBack(Char)
 			end)
-			
 		end
 	end
 	local function StartUpDate(Services)
