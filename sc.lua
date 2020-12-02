@@ -1,4 +1,4 @@
-local ScriptService = script.Parent
+local ScriptService = game:GetService("ScriptService")
 local ServerStorage = game:GetService("ServerStorage")
 local Rs = game:GetService("RunService")
 local Remotes = Instance.new("Folder")
@@ -45,14 +45,27 @@ function Build()
 					Service[i] = v
 				end
 			end
-			Service:Init()
+			local S,E = pcall(function()
+				Service:Init()
+			end)
+			if not S then
+				warn("Service Init Failed".. E)
+			end
+			
 		end
 	end
 	local function StartServices(Services)
 
 		for i,Service in pairs(Services) do
 			if (type(Service.Start) == "function") then
-				coroutine.resume(coroutine.create(Service.Start))
+				coroutine.resume(coroutine.create(function()
+					local S,E = pcall(function()
+						Service:Start()
+					end)
+					if not S then
+						warn("Service Start Failed ".. E)
+					end
+				end))
 			end
 
 		end
